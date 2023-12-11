@@ -1,19 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GroundCheck : MonoBehaviour
+public class TriggerCheck : MonoBehaviour
 {
-    [HideInInspector] public bool isGrounded = true;
-    private bool wasGrounded;
-    private List<Collider> colliders = new List<Collider>();
+    public bool HasCollision { get; private set; } = false;
+    private bool hadCollision;
+    private List<Collider> colliders = new();
     private Collider col;
-
-    public float nearestDistance = .0f;
         
     private void Start()
     {
         col = GetComponent<Collider>();
-        isGrounded = colliders.Count > 0;
+        HasCollision = colliders.Count > 0;
     }
         
     private void OnTriggerStay(Collider _other)
@@ -24,10 +22,10 @@ public class GroundCheck : MonoBehaviour
         }
         colliders.Add(_other);
             
-        isGrounded = true;
-        if (!wasGrounded)
+        HasCollision = true;
+        if (!hadCollision)
         {
-            wasGrounded = true;
+            hadCollision = true;
         }
     }
 
@@ -41,10 +39,10 @@ public class GroundCheck : MonoBehaviour
 
         if (colliders.Count == 0)
         {
-            isGrounded = false;
-            if (wasGrounded)
+            HasCollision = false;
+            if (hadCollision)
             {
-                wasGrounded = false;
+                hadCollision = false;
             }
         }
     }

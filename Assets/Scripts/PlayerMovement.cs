@@ -6,19 +6,17 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
-    public float walkSpeed, runSpeed, rotationSpeed, minJumpHeight, maxJumpHeight, jumpDuration, fallDuration, coyoteTime, jumpBufferDuration, horizontalInertia;
-    public GroundCheck groundedCheck;
-    public GroundCheck hangingCheck;
+    public float walkSpeed, runSpeed, minJumpHeight, maxJumpHeight, jumpDuration, fallDuration, coyoteTime, jumpBufferDuration, horizontalInertia;
+    public TriggerCheck groundedCheck;
     
     private float hMovementSpeed, jumpGravity, fallGravity, minJumpVelocity, maxJumpVelocity, currentCoyoteTime;
     private Rigidbody rb;
     private Vector3 velocity;
     private Quaternion rotation;
 
-    private bool jumpQueued, jumpReleaseQueued, isJumping;
+    private bool jumpInputPressed, JumpInputReleased, isJumping;
 
     public Camera cam;
-    private Transform camTransform;
 
     private Vector2 inputVector;
     private Vector3 movementVector;
@@ -26,8 +24,9 @@ public class PlayerMovement : MonoBehaviour
     public float mouseSensitivity = 120.0f;
     private float mouseX, mouseY;
 
-    private GameObject arms;
-    private bool armExtendQueued, armReleaseQueued, armsExtended, isHanging;
+    public GameObject[] arms;
+    private bool armExtendInputPressed, armExtendInputReleased, armsExtended, isHanging;
+    public TriggerCheck leftHandCheck, rightHandCheck;
     
     private void Awake()
     {
@@ -36,66 +35,35 @@ public class PlayerMovement : MonoBehaviour
         fallGravity = maxJumpHeight / Mathf.Pow(fallDuration, 2);
         minJumpVelocity = Mathf.Sqrt(2 * jumpGravity * minJumpHeight);
         maxJumpVelocity = Mathf.Sqrt(2 * jumpGravity * maxJumpHeight);
-        if (cam != null)
-        {
-            camTransform = cam.transform;
-        }
         Utility.LockCursor();
-        xAngle = .0f;
-    }
-
-    private void QueueJump()
-    {
-        if (groundedCheck.isGrounded)
-        {
-            jumpQueued = true;
-        }
-    }
-
-    private void QueueJumpRelease()
-    {
-        if (isJumping)
-        {
-            jumpReleaseQueued = true;
-        }
-    }
-
-    private void QueueExtendArms()
-    {
-        armExtendQueued = true;
-    }
-    
-    private void QueueReleaseArms()
-    {
-        armReleaseQueued = true;
     }
     
     private void Update()
     {
         // register all input calls and values
         inputVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-        //movementVector = new Vector3(inputVector.x, .0f, inputVector.y).normalized;
+        
+        mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            QueueJump();
+            jumpInputPressed = true;
         }
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            QueueJumpRelease();
+            JumpInputReleased = true;
         }
 
         if (Input.GetMouseButtonDown(0))
         {
-            QueueExtendArms();
+            armExtendInputPressed = true;
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            QueueReleaseArms();
+            armExtendInputReleased = true;
         }
-        
-        mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
     }
 
     private void FixedUpdate()
@@ -106,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
         HandleHorizontalMovement();
         HandleGravity();
         UpdateGrounded();
+        HandleHanging();
         HandleJumping();
         
         rb.velocity = velocity;
@@ -126,6 +95,10 @@ public class PlayerMovement : MonoBehaviour
     
     private void HandleHorizontalMovement()
     {
+        if (isHanging)
+        {
+            return;
+        }
         hMovementSpeed = walkSpeed;
         Vector3 relativeInput = transform.forward * inputVector.y + transform.right * inputVector.x;
         Vector3 newSpeed = Vector3.Lerp(velocity, relativeInput * hMovementSpeed, horizontalInertia);
@@ -134,47 +107,79 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleJumping()
     {
-        if (jumpQueued && groundedCheck.isGrounded)
+        if (jumpInputPressed)
         {
-            velocity = new Vector3(velocity.x, maxJumpVelocity, velocity.z);
-            isJumping = true;
-            jumpQueued = false;
+            jumpInputPressed = false;
+            if (groundedCheck.HasCollision)
+            {
+                velocity = new Vector3(velocity.x, maxJumpVelocity, velocity.z);
+                isJumping = true;
+            }
         }
         
-        if (jumpReleaseQueued)
+        if (JumpInputReleased)
         {
-            if (velocity.y > minJumpVelocity)
+            JumpInputReleased = false;
+            
+            if (isJumping && velocity.y > minJumpVelocity)
             {
                 velocity = new Vector3(velocity.x, minJumpVelocity, velocity.z);
             }
-
-            jumpReleaseQueued = false;
         }
     }
 
     private void HandleHanging()
     {
-        if (armExtendQueued)
+        if (armExtendInputPressed)
         {
-            armsExtended = true;
-            armExtendQueued = false;
+            armExtendInputPressed = false;
+
+            if (!isHanging)
+            {
+                armsExtended = true;
+            }
         }
 
-        if (armReleaseQueued)
+        if (armExtendInputReleased)
         {
-            armsExtended = false;
-            armReleaseQueued = false;
+            armExtendInputReleased = false;
+
+            if (!isHanging)
+            {
+                armsExtended = false;
+            }
         }
-        
-        if (armsExtended && !isHanging)
+
+        if (armsExtended)
         {
+            foreach (GameObject arm in arms)
+            {
+                arm.transform.localScale = new Vector3(arm.transform.localScale.x, arm.transform.localScale.y, 1.0f);
+                arm.transform.localPosition =
+                    new Vector3(arm.transform.localPosition.x, .25f, .25f);
+            }
             
+            if (!groundedCheck.HasCollision && (leftHandCheck.HasCollision || rightHandCheck.HasCollision))
+            {
+                isHanging = true;
+                velocity = Vector3.zero;
+                Debug.Log("grab!");
+            }
+        }
+        else
+        {
+            foreach (GameObject arm in arms)
+            {
+                arm.transform.localScale = new Vector3(arm.transform.localScale.x, arm.transform.localScale.y, 0.5f);
+                arm.transform.localPosition =
+                    new Vector3(arm.transform.localPosition.x, .0f, .0f);
+            }
         }
     }
 
     private void UpdateGrounded()
     {
-        if (!groundedCheck.isGrounded)
+        if (!groundedCheck.HasCollision)
         {
             return;
         }
@@ -197,6 +202,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleGravity()
     {
+        if (isHanging)
+        {
+            return;
+        }
+        
         if (velocity.y >= 0)
         {
             velocity = new Vector3(velocity.x, velocity.y - jumpGravity * Time.fixedDeltaTime, velocity.z);
