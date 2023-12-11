@@ -66,7 +66,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a67c8022893af914faab00c02544994a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasCollision: 0
 --- !u!1 &624621961081319079
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +237,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a67c8022893af914faab00c02544994a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasCollision: 0
 --- !u!1 &3080148379281391274
 GameObject:
   m_ObjectHideFlags: 0
@@ -530,7 +528,7 @@ GameObject:
   - component: {fileID: 2452781610369902998}
   - component: {fileID: 2102527209257338020}
   - component: {fileID: 147723678003701085}
-  - component: {fileID: 7374751882872707575}
+  - component: {fileID: 615332251579900963}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -655,7 +653,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &7374751882872707575
+--- !u!114 &615332251579900963
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -664,27 +662,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 8865185256179465849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ff4827c39f65c04d82d32da3d9c7683, type: 3}
+  m_Script: {fileID: 11500000, guid: 38b8ac6596054280970c3106790d1b87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkSpeed: 10
-  runSpeed: 20
-  rotationSpeed: 20
-  minJumpHeight: 2
-  maxJumpHeight: 4
-  jumpDuration: 0.5
-  fallDuration: 0.25
-  coyoteTime: 0.05
-  jumpBufferDuration: 0.05
-  horizontalInertia: 0.1
-  groundedCheck: {fileID: 1851821741623359566}
-  cam: {fileID: 5813940836668684406}
-  mouseSensitivity: 180
-  arms:
-  - {fileID: 624621961081319079}
-  - {fileID: 8856032080722933116}
-  leftHandCheck: {fileID: 306419891589216724}
-  rightHandCheck: {fileID: 6168483877909485234}
+  PlayerDataAsset: {fileID: 11400000, guid: c805a8959dce5454f912aecfae9a11c7, type: 2}
+  GroundedTrigger: {fileID: 1851821741623359566}
+  FirstPersonCamera: {fileID: 5813940836668684406}
 --- !u!1001 &8615718825189549936
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -838,4 +821,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a67c8022893af914faab00c02544994a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hasCollision: 1

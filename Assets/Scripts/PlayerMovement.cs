@@ -12,7 +12,6 @@ public class PlayerMovement : MonoBehaviour
     private float hMovementSpeed, jumpGravity, fallGravity, minJumpVelocity, maxJumpVelocity, currentCoyoteTime;
     private Rigidbody rb;
     private Vector3 velocity;
-    private Quaternion rotation;
 
     private bool jumpInputPressed, JumpInputReleased, isJumping;
 
