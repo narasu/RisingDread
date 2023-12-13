@@ -14,32 +14,29 @@ namespace Player
         private Vector3 velocity;
         private TriggerCheck groundedTrigger;
 
-        public MovementHandler(Scratchpad _pad, InputHandler _inputHandler, Rigidbody _rb)
+        public MovementHandler(PlayerData _data, Scratchpad _pad, InputHandler _inputHandler, Rigidbody _rb, TriggerCheck _groundedTrigger)
         {
             pad = _pad;
             inputHandler = _inputHandler;
             rb = _rb;
+            data = _data;
+            groundedTrigger = _groundedTrigger;
+
+            MovementFunctions movementFunctions = new()
+            {
+                ReadVelocity = this.ReadVelocity,
+                ApplyVelocity = this.ApplyVelocity,
+                StopVelocity = this.StopVelocity,
+                HandleWalking = this.HandleWalking,
+                HandleGravity = this.HandleGravity,
+                TryJumping = this.TryJumping,
+                HandleJumpRelease = this.HandleJumpRelease,
+                CheckIsGrounded = this.CheckIsGrounded,
+                GetIsFalling = this.GetIsFalling
+            };
             
-            Action updateVelocity = UpdateVelocity;
-            Action applyVelocity = ApplyVelocity;
-            Action handleWalking = HandleWalking;
-            Action handleGravity = HandleGravity;
-            Func<bool> tryJumping = TryJumping;
-            Action handleJumpRelease = HandleJumpRelease;
-            Func<bool> checkIsGrounded = CheckIsGrounded;
-            Func<bool> getIsFalling = GetIsFalling;
+            pad.Write(Strings.MovementFunctions, movementFunctions);
             
-            pad.Write(Strings.UpdateVelocity, updateVelocity);
-            pad.Write(Strings.ApplyVelocity, applyVelocity);
-            pad.Write(Strings.HandleWalking, handleWalking);
-            pad.Write(Strings.HandleGravity, handleGravity);
-            pad.Write(Strings.TryJumping, tryJumping);
-            pad.Write(Strings.HandleJumpRelease, handleJumpRelease);
-            pad.Write(Strings.CheckIsGrounded, checkIsGrounded);
-            pad.Write(Strings.GetIsFalling, getIsFalling);
-            
-            data = pad.Read<PlayerData>(Strings.PlayerData);
-            groundedTrigger = pad.Read<TriggerCheck>(Strings.GroundedTrigger);
 
             jumpGravity = 2f * data.MaxJumpHeight / Mathf.Pow(data.JumpDuration, 2);
             fallGravity = data.MaxJumpHeight / Mathf.Pow(data.FallDuration, 2);
@@ -66,6 +63,8 @@ namespace Player
                 velocity = new Vector3(velocity.x, velocity.y - fallGravity * Time.fixedDeltaTime, velocity.z);
             }
         }
+        
+        
 
         private bool GetIsFalling()
         {
@@ -107,8 +106,14 @@ namespace Player
             }
         }
 
-        private void UpdateVelocity() => velocity = rb.velocity;
+        private void ReadVelocity() => velocity = rb.velocity;
 
         private void ApplyVelocity() => rb.velocity = velocity;
+
+        private void StopVelocity()
+        {
+            rb.velocity = Vector3.zero;
+            velocity = Vector3.zero;
+        }
     }
 }

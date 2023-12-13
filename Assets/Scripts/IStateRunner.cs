@@ -1,4 +1,4 @@
 public interface IStateRunner
 {
-    Scratchpad ObjectData { get; }
+    Scratchpad Pad { get; }
 }

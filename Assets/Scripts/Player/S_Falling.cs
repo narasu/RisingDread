@@ -4,29 +4,34 @@ namespace Player
 {
     public class S_Falling : AbstractState
     {
-        private Action updateVelocity, applyVelocity, handleWalking, handleGravity;
-        private Func<bool> checkIsGrounded;
+        private MovementFunctions movementFunctions;
+        private ClimbingFunctions climbingFunctions;
         public S_Falling(Scratchpad _ownerData, StateMachine _ownerStateMachine) : base(_ownerData, _ownerStateMachine)
         {
-            updateVelocity = OwnerData.Read<Action>(Strings.UpdateVelocity);
-            applyVelocity = OwnerData.Read<Action>(Strings.ApplyVelocity);
-            handleWalking = OwnerData.Read<Action>(Strings.HandleWalking);
-            handleGravity = OwnerData.Read<Action>(Strings.HandleGravity);
-            checkIsGrounded = OwnerData.Read<Func<bool>>(Strings.CheckIsGrounded);
+            movementFunctions = OwnerData.Read<MovementFunctions>(Strings.MovementFunctions);
+            climbingFunctions = OwnerData.Read<ClimbingFunctions>(Strings.ClimbingFunctions);
         }
 
         public override void OnFixedUpdate()
         {
-            base.OnFixedUpdate();
-            updateVelocity.Invoke();
-            handleWalking.Invoke();
-            handleGravity.Invoke();
-            bool isGrounded = checkIsGrounded.Invoke();
+            movementFunctions.ReadVelocity.Invoke();
+            movementFunctions.HandleWalking.Invoke();
+            movementFunctions.HandleGravity.Invoke();
+            bool isGrounded = movementFunctions.CheckIsGrounded.Invoke();
             if (isGrounded)
             {
                 OwnerStateMachine.SwitchState(typeof(S_Grounded));
             }
-            applyVelocity.Invoke();
+            movementFunctions.ApplyVelocity.Invoke();
+            
+            climbingFunctions.HandleClimbPressed.Invoke();
+            climbingFunctions.HandleClimbReleased.Invoke();
+
+            bool isHanging = climbingFunctions.TryGrabLedge.Invoke();
+            if (isHanging)
+            {
+                OwnerStateMachine.SwitchState(typeof(S_Hanging));
+            }
         }
     }
 }

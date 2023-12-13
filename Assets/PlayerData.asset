@@ -21,3 +21,4 @@ MonoBehaviour:
   CoyoteTime: 0.05
   JumpBufferDuration: 0.05
   HorizontalInertia: 0.1
+  MouseSensitivity: 150

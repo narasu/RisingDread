@@ -11,8 +11,8 @@ namespace Player
         public float MouseY { get; private set; }
         public bool JumpPressed { get; private set; }
         public bool JumpReleased { get; private set; }
-        public bool HangPressed { get; private set; }
-        public bool HangReleased { get; private set; }
+        public bool ClimbPressed { get; private set; }
+        public bool ClimbReleased { get; private set; }
         public bool DropPressed { get; private set; }
         public bool DropReleased { get; private set; }
 
@@ -32,12 +32,12 @@ namespace Player
 
             if (Input.GetMouseButtonDown(0))
             {
-                HangPressed = true;
+                ClimbPressed = true;
             }
 
             if (Input.GetMouseButtonUp(0))
             {
-                HangReleased = true;
+                ClimbReleased = true;
             }
 
             if (Input.GetMouseButtonDown(1))
@@ -56,8 +56,8 @@ namespace Player
         {
             JumpPressed = false;
             JumpReleased = false;
-            HangPressed = false;
-            HangReleased = false;
+            ClimbPressed = false;
+            ClimbReleased = false;
             DropPressed = false;
             DropReleased = false;
         }
