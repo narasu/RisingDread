@@ -18,9 +18,9 @@ namespace Player
         private Rigidbody rb;
         private MovementHandler movementHandler;
         private ClimbingHandler climbingHandler;
+        private CameraHandler cameraHandler;
         private StateMachine fsm = new();
         private InputHandler inputHandler = new();
-        private CameraHandler cameraHandler;
 
         private void Awake()
         {
@@ -32,7 +32,7 @@ namespace Player
 
             movementHandler = new MovementHandler(PlayerDataAsset, Pad, inputHandler, rb, GroundedTrigger);
             climbingHandler = new ClimbingHandler(Pad, inputHandler, Arms, LeftHand, RightHand);
-            cameraHandler = new CameraHandler(PlayerDataAsset, inputHandler, FirstPersonCamera, rb);
+            cameraHandler = new CameraHandler(PlayerDataAsset, Pad, inputHandler, FirstPersonCamera, rb);
             Utility.LockCursor();
         }
 
@@ -49,12 +49,10 @@ namespace Player
         {
             inputHandler.ReadInput();
             fsm.Update();
-            cameraHandler.MouseLook();
         }
 
         private void FixedUpdate()
         {
-            cameraHandler.RotateBody();
             fsm.FixedUpdate();
             inputHandler.ConsumeInput();
         }
